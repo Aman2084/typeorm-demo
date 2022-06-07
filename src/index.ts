@@ -1,40 +1,69 @@
 import * as Koa from "koa";
 import { AppDataSource } from "./data-source"
-import { User } from "./entity/User"
 import { Song } from "./entity/Song";
+import { createConnection } from "typeorm";
+import { Album } from "./entity/Album";
 import { Relation } from "./entity/Relation";
+import SQL from "./sql";
 
+
+const app = new Koa()
+const sql = new SQL()
+console.log(1);
 
 AppDataSource.initialize().then(async () => {
+    sql.manager = AppDataSource.manager
+    console.log("数据库初始化完成")
+    creatInterface()
+    initCompleted()
+}).catch(error => {
+    console.log("数据库初始化失败" ,error)
+})
 
-    console.log("Inserting a new user into the database...")
-    const user = new User()
-    user.firstName = "Timber"
-    user.lastName = "Saw"
-    user.age = 25
-    await AppDataSource.manager.save(user)
-    console.log("Saved a new user with id: " + user.id)
 
-    console.log("Loading users from the database...")
-    const users = await AppDataSource.manager.find(Song)
-    console.log("Loaded users: ", users)
+function creatInterface(){
+    app.use(async (ctx , next) => {
+        const request = await getRequest(ctx.request.url)
+        ctx.body = {
+            msg: 'ok',
+            code: request? 200 : 401,
+            success: true,
+            data: request ,
+        }
+        await next()
+    });
+    app.listen(3000)
+    console.log("接口始化完成")
+}
 
-    console.log("Here you can setup and run express / fastify / any other framework.")
+function initCompleted(){
+    console.log("========= 初始化完成 =========")
 
-}).catch(error => console.log(error))
+    console.log(
+        "1. 查询所有歌曲：http://localhost:3000/getSongs \n",
+        "2. 查询所有专辑：http://localhost:3000/getAlbums \n",
+        "3. 查询所有关系：http://localhost:3000/getRelations \n",
+    );
+}
 
-const app = new Koa();
-app.use(async (ctx , next) => {
-    const url = ctx.request.url;
-    const request = "data";
-
-    ctx.body = {
-        msg: 'ok',
-        code: request? 200 : 401,
-        success: true,
-        data: request ,
-    };;
-    await next();
-});
-
-app.listen(3000);
+async function getRequest($url:string){
+    const a = $url.split("?")
+    let o = new Map()
+    if(a[1]){
+        const b = a[1].split("&")
+        b.forEach(s=>{
+            const c = s.split("=")
+            o.set(c[0] , c[1])
+        })
+    }
+    
+    switch(a[0]){
+        case "/getSongs":
+            return await sql.getAllSongs()
+        case "/getAlbums":
+            return await sql.getAllSongs()
+        case "/getRelations":
+            return await sql.getAllRelations()
+    }
+    return null
+}

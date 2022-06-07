@@ -1,4 +1,7 @@
-import { Entity, PrimaryGeneratedColumn , Column} from "typeorm"
+import { Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToMany, Column} from "typeorm"
+
+
+/* */
 
 @Entity()
 export class Relation{
@@ -6,9 +9,8 @@ export class Relation{
     id: number
 
     @Column()
-    album: number
+    songId: number
 
     @Column()
-    song: number
-
+    albumId: number
 }

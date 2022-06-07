@@ -1,4 +1,5 @@
-import {Entity , PrimaryGeneratedColumn , Column} from "typeorm"
+import {Entity , PrimaryGeneratedColumn , Column, OneToMany, JoinColumn, ManyToOne} from "typeorm"
+import { Album } from "./Album"
 
 @Entity()
 export class Song{
@@ -8,4 +9,11 @@ export class Song{
 
     @Column()
     name: string
+
+
+
+    /*  
+    @ManyToOne((type) => Album , (album) => album.songs)
+    album: Album
+   */
 }
