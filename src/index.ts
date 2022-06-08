@@ -1,15 +1,10 @@
 import * as Koa from "koa";
-import { AppDataSource } from "./data-source"
-import { Song } from "./entity/Song";
-import { createConnection } from "typeorm";
-import { Album } from "./entity/Album";
-import { Relation } from "./entity/Relation";
+import { AppDataSource } from "./data-source";
 import SQL from "./sql";
 
 
 const app = new Koa()
 const sql = new SQL()
-console.log(1);
 
 AppDataSource.initialize().then(async () => {
     sql.manager = AppDataSource.manager
@@ -43,6 +38,12 @@ function initCompleted(){
         "1. 查询所有歌曲：http://localhost:3000/getSongs \n",
         "2. 查询所有专辑：http://localhost:3000/getAlbums \n",
         "3. 查询所有关系：http://localhost:3000/getRelations \n",
+        "4. 添加歌曲：http://localhost:3000/addSong?name=自定义歌曲&album=1  \n",
+        "5. 修改歌曲：http://localhost:3000/updateSong?id=9&name=自定义歌曲名A  \n",
+        "6. 删除歌曲：http://localhost:3000/removeSong?id=12  \n",
+        "6. 查询专辑详情：http://localhost:3000/getAlbumInfo?id=1  \n"
+
+
     );
 }
 
@@ -64,6 +65,18 @@ async function getRequest($url:string){
             return await sql.getAllSongs()
         case "/getRelations":
             return await sql.getAllRelations()
+        case "/addSong":
+            if(o.has("albumId")){
+                return await sql.addSong(decodeURI(o.get("name")), Number(o.get("albumId")))
+            }else{
+                return await sql.addSong(decodeURI(o.get("name")))
+            }
+        case "/updateSong":
+            return await sql.updateSong(Number(o.get("id")), decodeURI(o.get("name")))
+        case "/removeSong":
+            return await sql.removeSong(Number(o.get("id")))
+        case "/getAlbumInfo":
+            return await sql.getAlbumById(Number(o.get("id")))
     }
     return null
 }
